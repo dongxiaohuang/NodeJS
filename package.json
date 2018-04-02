@@ -4,7 +4,7 @@
   "description": "a simple node example to calculate perimeter and area of rectangle",
   "main": "index.js",
   "scripts": {
-    "test": "node index"
+    "start": "node index"
   },
   "author": "don",
   "license": "ISC"
