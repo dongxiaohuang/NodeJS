@@ -12,10 +12,11 @@ module.exports = (x, y, callback) => {
   }
 else{
   setTimeout(() =>
-    callback(null // return value,
+    callback(null, // return value,
       {
         perimeter: () => (2*(x+y)), // closure of javascript, we dont need to add (x,y)
-        area: () => (x*y)
+        area: () => (x*y),
+        val:2
       }// return value
     )
     ,2000);}
