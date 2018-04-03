@@ -1,9 +1,12 @@
 const express = require('express');
 const http = require('http');
+const morgan = require('morgan');
 
 let hostname = 'localhost';
 let port = 3000;
 let app = express();
+app.use(morgan('dev'));
+app.use(express.static(__dirname + '/public')); // __dirname is the root of the project
 app.use((req, res, next) => {
   console.log(req.headers);
   res.statusCode = 200;
