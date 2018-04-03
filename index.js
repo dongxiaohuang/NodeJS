@@ -3,6 +3,8 @@ const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const dishRouter = require('./routes/dishRouter');
+const pRouter = require('./routes/promotionsRouter');
+const leaderRouter = require('./routes/leadersRouter');
 
 let hostname = 'localhost';
 let port = 3000;
@@ -13,6 +15,8 @@ app.use(bodyParser.json()) // use this middleware to parse the json data inside 
 
 // app.use('/dishes', dishRouter);
 app.use('/dishes', dishRouter);
+app.use('/promotions', pRouter);
+app.use('/leaders', leaderRouter);
 
 app.use((req, res, next) => {
   console.log(req.headers);

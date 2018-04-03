@@ -37,7 +37,7 @@ dishRouter.route('/:dishID')
   res.end(req.method + " not supported!");
 })
 .put((req, res, next) => {
-  res.write('Updating the details for ID = '+ req.params.dishID);
+  res.mrite('Updating the details for ID = '+ req.params.dishID + '\n');
   res.end("will update dish :" + req.params.dishID + " with the details : " + req.body.description );
 })
 // use :PARAMS_NAME to add params through endpoint
