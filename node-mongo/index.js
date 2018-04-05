@@ -4,35 +4,48 @@ const dboper = require('./dboper');
 
 const url = 'mongodb://localhost:27017/conFusion'; // conFusion database server
 
-MongoClient.connect(url, (err, database) => {
-  assert.equal(err, null);
+MongoClient.connect(url)
+  .then((database) => {
 
-  console.log('Connected correctly to server');
-  const db = database.db('conFusion');
+    console.log('Connected correctly to server');
+    const db = database.db('conFusion');
 
-  dboper.insertDocument(db, {"name" : "apple", "description" : " a fruit"},
-    'dishes', (result) => {
-      console.log("Insert Document: \n", result.ops);
+    return dboper.insertDocument(db, {
+          "name": "apple",
+          "description": " a fruit"
+        },
+        'dishes')
+      .then((result) => {
+        console.log("Insert Document: \n", result.ops);
 
-      dboper.findAllDocuments(db, 'dishes', (docs) => {
+        return dboper.findAllDocuments(db, 'dishes');
+      })
+      .then((docs) => {
         console.log("Found Documents: \n", docs);
+        
+        return dboper.updateDocument(db, {
+          "name": "apple"
+        }, {
+          "description": " I have a pen, I have an apple, I have an apple pen!"
+        }, 'dishes')
+      })
+      .then((result) => {
+        console.log("Updated Document: \n", result.result);
 
-        dboper.updateDocument(db, {"name" : "apple"},
-          {"description" : " I have a pen, I have an apple, I have an apple pen!"},'dishes',
-          (result) => {
-            console.log("Updated Document: \n", result.result);
+        return dboper.findAllDocuments(db, 'dishes')
+      })
+      .then((docs) => {
+        console.log("Found Updated Documents: \n", docs);
 
-            dboper.findAllDocuments(db, 'dishes', (docs) => {
-              console.log("Found Updated Documents: \n", docs);
+        return db.dropCollection('dishes') // should return a promise
+      })
+      .then((result) => {
+        console.log("Dropped Collection: ", result);
 
-              db.dropCollection('dishes', (result) => {
-                console.log("Dropped Collection: ", result);
-
-                database.close();
-              });
-            });
-          });
+        return database.close();
+      })
+      .catch((err) => {
+        console.log(err)
       });
-    });
-
-});
+  })
+  .catch((err) => console.log(err));
