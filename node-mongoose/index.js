@@ -12,19 +12,24 @@ connect.then(() => {
     //You can access the default connection using mongoose.connection.
     console.log('Connected correctly to server');
 
-    var newDish = Dishes({
-        name: 'Uthappiz2za',
-        description: 'test'
-    });
-
-    newDish.save()
+    Dishes.create({
+            name: 'Uthappiz2za',
+            description: 'test'
+        })
         .then((dish) => {
             console.log(dish);
 
-            return Dishes.find({}).exec();
+            return Dishes.findByIdAndUpdate(dish._id, {
+                    $set: {
+                        description: "new test"
+                    }
+                }, {
+                    new: true  //return a updated data in promise
+                })
+                .exec();
         })
-        .then((dishes) => {
-            console.log(dishes);
+        .then((dish) => {
+            console.log(dish);
 
             return db.collection('dishes').drop();
         })
