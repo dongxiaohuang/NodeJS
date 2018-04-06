@@ -10,7 +10,7 @@ connect.then(() => {
     const db = mongoose.connection;
     //Mongoose creates a default connection when you call mongoose.connect().
     //You can access the default connection using mongoose.connection.
-    console.log('Connected correctly to server');
+    console.log('Connected correctly to server \n');
 
     Dishes.create({
             name: 'Uthappiz2za',
@@ -29,7 +29,23 @@ connect.then(() => {
                 .exec();
         })
         .then((dish) => {
-            console.log(dish);
+            console.log("After updated: \n",dish);
+
+            // return dish.comments.create({
+            //     rating: 5,
+            //     author: "Don",
+            //     comment: "This is really delicious"
+            // })
+            dish.comments.push({
+                rating: 5,
+                author: "Don",
+                comment: "This is really delicious"
+            });
+
+            return dish.save();
+        })
+        .then((updated_dish) => {
+            console.log("After adding comments: \n", updated_dish);
 
             return db.collection('dishes').drop();
         })
