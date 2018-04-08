@@ -1,50 +1,83 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
+const Leaders = require('../models/leaders');
 let leaderRouter = express.Router();
 leaderRouter.use(bodyParser.json());
 
 leaderRouter.route('/')
-.all((req, res, next) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  next();
-})
 .get((req, res, next) => {
-  res.end('will get info of leaders');
-})
+    Leaders.find({}).
+    then((leaders) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(leaders);
+    })
+}, (err) => {next(err)})
 .post((req, res, next) => {
-  res.end('will add the info of leader ' + req.body.name + " with details of " + req.body.description);
-})
+    Leaders.create(req.body)
+    .then((leaders) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(leaders);
+    })
+    .catch((err) => next(err));
+}, (err) => next(err))
 .put((req, res, next) => {
-  res.statusCode = 403;
-  res.end(req.method + ' not supported!');
-})
+  var err = (req.method + ' not supported!');
+  err.status = 403;
+  next(err);
+}, (err) => next(err))
 .delete((req, res, next) => {
-  res.end('will delete all the info of leaders');
-});
+    Leaders.remove({})
+    .then((resp) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resp);
+    })
+    .catch(err => next(err));
+}, (err) => next(err))
 
 
-leaderRouter.route('/:leaderId')
-.all((req, res, next) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  next();
-})
+
+leaderRouter.route('/:leaderID')
 .get((req, res, next) => {
-  res.end("will return the leader of id :" + req.params.leaderId + ' to you!');
-})
+    Leaders.findById(req.params.leaderID)
+    .then((leader) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(leader);
+    })
+    .catch((err) => {next(err)});
+}, (err) => {next(err)})
 .post((req, res, next) => {
-  res.statusCode = 403; // method not supported
-  res.end(req.method + " not supported!");
+    var err = new Error(req.method + " not supported!");
+    err.status = 403; // method not supported
+    next(err);
 })
 .put((req, res, next) => {
-  res.write('Updating the details for ID = '+ req.params.leaderId +'\n');
-  res.end("will update leader :" + req.params.leaderId + " with the details : " + req.body.description );
+    Leaders.findByIdAndUpdate(req.params.leaderID, {
+        $set: req.body
+    }, {
+        new:true
+    })
+    .then((leader) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(leader);
+    })
+    .catch(err => next(err))
 })
 // use :PARAMS_NAME to add params through endpoint
 .delete((req, res, next) => {
-  res.end("will delete the leader with ID = " + req.params.leaderId);
+    Leaders.findByIdAndRemove(req.params.leaderID)
+    .then((resp) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resp);
+    })
+    .catch((err) => next(err))
 });
 
 module.exports = leaderRouter;
