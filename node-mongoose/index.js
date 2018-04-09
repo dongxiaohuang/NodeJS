@@ -48,6 +48,7 @@ connect.then(() => {
             console.log("After adding comments: \n", updated_dish);
 
             return db.collection('dishes').drop();
+            // return Dishes.drop(); // is wrong
         })
         .then(() => {
             return db.close();
