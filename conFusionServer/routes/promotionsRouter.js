@@ -4,41 +4,86 @@ const bodyParser = require('body-parser');
 let promotionRouter = express.Router();
 promotionRouter.use(bodyParser.json());
 
+const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
+let Promotions = require('../models/promotions');
+
 promotionRouter.route('/')
-.all((req, res, next) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  next(); // without next, the client will never get response form the following method
-})
 .get((req, res, next) => {
-  res.end('will get info of promotions');
+  Promotions.find({})
+  .then((promotions) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(promotions);
+  }, (err) => next(err))
+  .catch((err) =>  next(err));
 })
 .post((req, res, next) => {
-  res.end('will add the info of promotions ' + req.body.name + " with details of " + req.body.description);
+    Promotions.create(req.body)
+    .then((promotions) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(promotions);
+    }, (err) => (next(err)))
+    .catch((err) => {next(err)});
 })
 .put((req, res, next) => {
-  res.statusCode = 403;
-  res.end(req.method + ' not supported!');
+    var err = new Error(req.method + ' not supported!');
+    err.status = 403;
+    next(err);
 })
 .delete((req, res, next) => {
-  res.end('will delete all the info of promotions');
+    Promotions.remove({})
+    .then((resp) => {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(resp);
+  }, (err) => next(err))
+  .catch((err) => {next(err)});
 });
 
 promotionRouter.route('/:promoId')
 .get((req, res, next) => {
-  res.end("will return the promotion of id :" + req.params.promoId + ' to you!');
+  Promotions.findById(req.params.promoId)
+  .then((promotion) => {
+      if(promotion){
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json(promotion);
+      }else{
+          var err = new Error('promotion ID ' + req.params.promoId + ' not found!');
+          err.status = 404;
+          return next(err);
+      }
+  }, (err) => next(err))
+  .catch((err) => next(err));
 })
 .post((req, res, next) => {
-  res.statusCode = 403; // method not supported
-  res.end(req.method + " not supported!");
+  var err = new Error(req.method + " not supported!");
+  err.status = 403;
+  return next(err);
 })
 .put((req, res, next) => {
-  res.write('Updating the details for ID = '+ req.params.promoId +'\n');
-  res.end("will update promotion :" + req.params.promoId + " with the details : " + req.body.description );
+    Promotions.findByIdAndUpdate(req.params.promoId,
+    {$set : req.body},{
+        new: true
+    })
+    .then((promotion) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(promotion);
+    }, (err) => next(err))
+    .catch((err) => next(err));
 })
 // use :PARAMS_NAME to add params through endpoint
 .delete((req, res, next) => {
-  res.end("will delete the promotion with ID = " + req.params.promoId);
+    Promotions.findByIdAndRemove(req.params.promoId)
+    .then((resp) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resp);
+    }, (err) => next(err))
+    .catch((err) => next(err));
 });
 
 
