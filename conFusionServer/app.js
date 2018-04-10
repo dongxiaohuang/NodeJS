@@ -27,31 +27,47 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('12345bdksjhbksb')); // string to be used for encoding
 
 
 function auth(req, res, next) {
-    console.log(req.headers);
-    var authHeader = req.headers.authorization;
-    if(!authHeader){
-        var err = new Error('You are not authorized!');
-        res.setHeader('WWW-Authenticate', 'Basic');// pop up log-in window
-        err.status = 401;
-        return next(err);
+    if(!req.signedCookies.user){
+        console.log(req.headers);
+        var authHeader = req.headers.authorization;
+        if(!authHeader){
+            var err = new Error('You are not authorized!');
+            res.setHeader('WWW-Authenticate', 'Basic');// pop up log-in window
+            err.status = 401;
+            return next(err);
+        }
+
+        var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString()
+        .split(':');
+        var user = auth[0];
+        var psw = auth[1];
+        // The identity (===) operator behaves identically to the equality (==)
+        // operator except no type conversion is done,
+        //and the types must be the same to be considered equal.
+
+        if(user === 'admin' && psw === 'password'){
+            res.cookie('user', 'admin', {signed: true}); // set signed cookie
+            next(); //authorized
+        }else{
+            var err = new Error('You are not authorized!');
+            res.setHeader('WWW-Authenticate', 'Basic');// pop up log-in window
+            err.status = 401;
+            return next(err);
+        }
+    }else{
+        if(req.signedCookies.user === 'admin'){
+            next();
+        }else{
+            var err = new Error('You are not authorized!');
+            err.status = 401;
+            return next(err);
+        }
     }
 
-    var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString()
-        .split(':');
-    var user = auth[0];
-    var psw = auth[1];
-    if(user === 'admin' && psw === 'password'){
-        next(); //authorized
-    }else{
-        var err = new Error('You are not authorized!');
-        res.setHeader('WWW-Authenticate', 'Basic');// pop up log-in window
-        err.status = 401;
-        return next(err);
-    }
 }
 
 app.use(auth);
