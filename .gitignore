@@ -2,3 +2,4 @@ node_modules
 testing
 .DS_Store
 mongoDB
+sessions
