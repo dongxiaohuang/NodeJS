@@ -5,6 +5,7 @@ mongoose.Promise = require('bluebird');
 const Leaders = require('../models/leaders');
 let leaderRouter = express.Router();
 leaderRouter.use(bodyParser.json());
+var authenticate = require('../authenticate');
 
 leaderRouter.route('/')
 .get((req, res, next) => {
@@ -15,7 +16,7 @@ leaderRouter.route('/')
         res.json(leaders);
     })
 }, (err) => {next(err)})
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Leaders.create(req.body)
     .then((leaders) => {
         res.statusCode = 200;
@@ -24,12 +25,12 @@ leaderRouter.route('/')
     })
     .catch((err) => next(err));
 }, (err) => next(err))
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
   var err = (req.method + ' not supported!');
   err.status = 403;
   next(err);
 }, (err) => next(err))
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Leaders.remove({})
     .then((resp) => {
         res.statusCode = 200;
@@ -51,12 +52,12 @@ leaderRouter.route('/:leaderID')
     })
     .catch((err) => {next(err)});
 }, (err) => {next(err)})
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     var err = new Error(req.method + " not supported!");
     err.status = 403; // method not supported
     next(err);
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     Leaders.findByIdAndUpdate(req.params.leaderID, {
         $set: req.body
     }, {
@@ -70,7 +71,7 @@ leaderRouter.route('/:leaderID')
     .catch(err => next(err))
 })
 // use :PARAMS_NAME to add params through endpoint
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Leaders.findByIdAndRemove(req.params.leaderID)
     .then((resp) => {
         res.statusCode = 200;

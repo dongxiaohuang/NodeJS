@@ -9,7 +9,7 @@ var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var passport = require('passport');
 var authenticate = require('./authenticate');// to include local strategy
-
+var config = require('./config');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -19,7 +19,7 @@ var promotionsRouter = require('./routes/promotionsRouter');
 var usersRouter = require('./routes/users');
 var app = express();
 
-var url = 'mongodb://localhost:27017/conFusion'
+var url = config.mongoUrl;
 const connect = mongoose.connect(url);
 connect.then(() => {
     console.log('connect correctly');
@@ -34,34 +34,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser('12345bdksjhbksb')); // string to be used for encoding
 
-app.use(session({
-    name: 'session-id',
-    secret: '12345-67890-09876-54321', //a secret key
-    saveUninitialized: false,
-    resave: false,
-    store: new FileStore()
-}));
 
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-function auth(req, res, next) {
-    console.log('req.user', req.user);
-    if(!req.user){
-        var err = new Error('You are not authorized!');
-        err.status = 403;
-        return next(err);
-    }else{
-        next();
-    }
-}
 
-
-app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

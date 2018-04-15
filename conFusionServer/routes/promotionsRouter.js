@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+var authenticate = require('../authenticate');
 let promotionRouter = express.Router();
 promotionRouter.use(bodyParser.json());
 
@@ -18,7 +18,7 @@ promotionRouter.route('/')
   }, (err) => next(err))
   .catch((err) =>  next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Promotions.create(req.body)
     .then((promotions) => {
         res.statusCode = 200;
@@ -27,12 +27,12 @@ promotionRouter.route('/')
     }, (err) => (next(err)))
     .catch((err) => {next(err)});
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     var err = new Error(req.method + ' not supported!');
     err.status = 403;
     next(err);
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.remove({})
     .then((resp) => {
       res.statusCode = 200;
@@ -58,12 +58,12 @@ promotionRouter.route('/:promoId')
   }, (err) => next(err))
   .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
   var err = new Error(req.method + " not supported!");
   err.status = 403;
   return next(err);
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promoId,
     {$set : req.body},{
         new: true
@@ -76,7 +76,7 @@ promotionRouter.route('/:promoId')
     .catch((err) => next(err));
 })
 // use :PARAMS_NAME to add params through endpoint
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndRemove(req.params.promoId)
     .then((resp) => {
         res.statusCode = 200;
