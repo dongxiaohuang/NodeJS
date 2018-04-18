@@ -7,9 +7,9 @@ var authenticate = require('../authenticate');
 
 router.use(bodyParser.json())
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.send('respond with a resource');
-});
+// router.get('/', function(req, res, next) {
+//     res.send('respond with a resource');
+// });
 
 router.post('/signup', (req, res, next) => {
     User.register(new User({username: req.body.username}),
@@ -19,13 +19,26 @@ router.post('/signup', (req, res, next) => {
                 res.setHeader('Content-Type', 'application/json');
                 res.json({err: err});
             } else {
-                //double check if the user register right
-                console.log('step into here and going to authenticate');
-                passport.authenticate('local')(req, res, () => {
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json({success : true, status: "Registeration successful!"});
-                });
+                if(req.body.firstname){
+                    user.firstname = req.body.firstname;
+                }
+                if(req.body.secondname){
+                    user.secondname = req.body.secondname;
+                }
+                user.save((err, user) => {
+                    if(err){
+                        res.statusCode = 500;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({err: err});
+                    }
+                    //double check if the user register right
+                    console.log('step into here and going to authenticate');
+                    passport.authenticate('local')(req, res, () => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({success : true, status: "Registeration successful!"});
+                    });
+                })
             }
         });
 });
@@ -37,6 +50,10 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
     res.json({success: true, token: token, status: 'You are successfully logged in!'});
 });
 
-
-
+router.get('/logout', (req, res, next) => {
+  if(req.session){
+          req.session.destroy();
+          res.clearCookie('session-id');
+          res.redirect('/');
+}})
 module.exports = router;

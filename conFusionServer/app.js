@@ -39,7 +39,6 @@ app.use(cookieParser('12345bdksjhbksb')); // string to be used for encoding
 app.use(passport.initialize());
 // app.use(passport.session());
 
-app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 
