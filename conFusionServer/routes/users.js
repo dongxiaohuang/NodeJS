@@ -60,7 +60,7 @@ router.post('/login', (req, res, next) => {
                if (err) {
                     res.statusCode = 401;
                     res.setHeader('Content-Type', 'application/jsom');
-                    res.json(success: false, status: "Login Unsuccessful", err: "Could not login user");
+                    res.json({success: false, status: "Login Unsuccessful", err: "Could not login user"});
                }
           //auto generate 401 error if not successful
                var token = authenticate.getToken({_id: req.user._id});
