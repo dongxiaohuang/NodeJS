@@ -53,7 +53,7 @@ router.post('/login', (req, res, next) => {
           if(!user){
                res.statusCode = 401;
                res.setHeader('Content-Type', 'application/jsom');
-               res.json(success: false, status: "Login Unsuccessful", err: info);
+               res.json({success: false, status: 'Login Unsuccessful!', err: info});
           }
           // try to login user
           req.logIn(user, (err) => {
