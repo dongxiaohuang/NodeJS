@@ -5,10 +5,10 @@ const dboper = require('./dboper');
 const url = 'mongodb://localhost:27017/conFusion'; // conFusion database server
 
 MongoClient.connect(url)
-  .then((database) => {
+  .then((mongodb) => {
 
     console.log('Connected correctly to server');
-    const db = database.db('conFusion');
+    const db = mongodb.db('conFusion');
 
     return dboper.insertDocument(db, {
           "name": "apple",
@@ -22,7 +22,7 @@ MongoClient.connect(url)
       })
       .then((docs) => {
         console.log("Found Documents: \n", docs);
-        
+
         return dboper.updateDocument(db, {
           "name": "apple"
         }, {
@@ -42,7 +42,7 @@ MongoClient.connect(url)
       .then((result) => {
         console.log("Dropped Collection: ", result);
 
-        return database.close();
+        return mongodb.close();
       })
       .catch((err) => {
         console.log(err)
